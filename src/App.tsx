@@ -1,49 +1,119 @@
 import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
+import { Landing } from './components/Landing';
+import { Dashboard } from './components/Dashboard';
+import { Generate } from './components/Generate';
+import { Result } from './components/Result';
+import { History } from './components/History';
+import { Settings } from './components/Settings';
+
+export type View = 'landing' | 'dashboard' | 'generate' | 'result' | 'history' | 'settings';
+
+export interface GeneratedContent {
+  id: string;
+  prompt: string;
+  type: 'image' | 'video';
+  model: string;
+  date: string;
+  cost: number;
+  url: string;
+}
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [currentView, setCurrentView] = useState<View>('landing');
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [balance, setBalance] = useState(150.42);
+  const [currentResult, setCurrentResult] = useState<GeneratedContent | null>(null);
+  const [history, setHistory] = useState<GeneratedContent[]>([
+    {
+      id: '1',
+      prompt: 'A futuristic city at sunset with flying cars',
+      type: 'image',
+      model: 'SD3.5',
+      date: '2025-11-28',
+      cost: 0.15,
+      url: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800'
+    },
+    {
+      id: '2',
+      prompt: 'Ocean waves in slow motion',
+      type: 'video',
+      model: 'Veo 3',
+      date: '2025-11-27',
+      cost: 0.85,
+      url: 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800'
+    },
+    {
+      id: '3',
+      prompt: 'Abstract geometric patterns in blue',
+      type: 'image',
+      model: 'Midjourney',
+      date: '2025-11-26',
+      cost: 0.20,
+      url: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800'
+    },
+  ]);
+
+  const handleConnectWallet = () => {
+    setIsWalletConnected(true);
+    setCurrentView('dashboard');
+  };
+
+  const handleDisconnectWallet = () => {
+    setIsWalletConnected(false);
+    setCurrentView('landing');
+  };
+
+  const handleGenerate = (content: Omit<GeneratedContent, 'id' | 'date'>) => {
+    const newContent: GeneratedContent = {
+      ...content,
+      id: Date.now().toString(),
+      date: new Date().toISOString().split('T')[0],
+    };
+    setHistory([newContent, ...history]);
+    setBalance(balance - content.cost);
+    setCurrentResult(newContent);
+    setCurrentView('result');
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-8">
-          <div className="flex justify-center space-x-8 mb-8">
-            <a href="https://vite.dev" target="_blank" rel="noopener noreferrer">
-              <img
-                src={viteLogo}
-                className="h-16 p-2 hover:drop-shadow-[0_0_2em_#646cffaa] transition-all duration-300"
-                alt="Vite logo"
-              />
-            </a>
-            <a href="https://react.dev" target="_blank" rel="noopener noreferrer">
-              <img
-                src={reactLogo}
-                className="h-16 p-2 hover:drop-shadow-[0_0_2em_#61dafbaa] transition-all duration-300 animate-spin"
-                alt="React logo"
-                style={{ animationDuration: '20s' }}
-              />
-            </a>
-          </div>
-
-          <h1 className="text-4xl font-bold text-center text-gray-900 mb-8">Hackaton 402</h1>
-
-          <div className="text-center">
-            <button
-              onClick={() => setCount((count) => count + 1)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 mb-4"
-            >
-              Count is {count}
-            </button>
-            <p className="text-gray-600 mb-4">
-              Edit <code className="bg-gray-100 px-2 py-1 rounded text-sm">src/App.tsx</code> and save to test HMR
-            </p>
-          </div>
-
-          <p className="text-center text-gray-500 text-sm">Click on the Vite and React logos to learn more</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white">
+      {currentView === 'landing' && (
+        <Landing onConnectWallet={handleConnectWallet} />
+      )}
+      {currentView === 'dashboard' && (
+        <Dashboard
+          balance={balance}
+          onNavigate={setCurrentView}
+          history={history.slice(0, 5)}
+        />
+      )}
+      {currentView === 'generate' && (
+        <Generate
+          balance={balance}
+          onNavigate={setCurrentView}
+          onGenerate={handleGenerate}
+        />
+      )}
+      {currentView === 'result' && currentResult && (
+        <Result
+          content={currentResult}
+          onNavigate={setCurrentView}
+          onRegenerate={() => setCurrentView('generate')}
+        />
+      )}
+      {currentView === 'history' && (
+        <History
+          history={history}
+          onNavigate={setCurrentView}
+        />
+      )}
+      {currentView === 'settings' && (
+        <Settings
+          isWalletConnected={isWalletConnected}
+          onNavigate={setCurrentView}
+          onDisconnectWallet={handleDisconnectWallet}
+        />
+      )}
     </div>
   );
 }
