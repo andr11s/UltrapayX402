@@ -291,8 +291,8 @@ npm run lint     # Linting con ESLint
 - [x] Diseño responsive
 - [x] Sistema de colores y tipografia
 - [x] Boton de desconexion funcional en todas las vistas
-- [x] Navegacion con flechas atras/adelante en el Header
-- [x] Logo clickeable que lleva al Dashboard
+- [x] Navegacion con flechas del navegador (Browser History API)
+- [x] Logo clickeable que lleva al Landing (desconecta wallet)
 
 ### Pendiente (por integrar)
 - [ ] Conexion real con wallet x402
@@ -386,15 +386,17 @@ npm run lint     # Linting con ESLint
   - History.tsx: Acepta y pasa `onDisconnect` al Sidebar
   - Ahora el boton "Desconectar" en el Sidebar funciona en todas las vistas
 
-- **Sistema de navegacion con historial (flechas atras/adelante):**
-  - App.tsx: Agregado estado `viewHistory` y `historyIndex` para rastrear el historial de vistas
-  - App.tsx: Nuevas funciones `navigateTo`, `goBack`, `goForward`, `canGoBack`, `canGoForward`
-  - Header.tsx: Agregadas flechas de navegacion (ChevronLeft/ChevronRight)
-  - Flechas deshabilitadas visualmente cuando no hay historial disponible
-  - Todos los componentes actualizados para pasar props de navegacion al Header
+- **Navegacion integrada con Browser History API:**
+  - App.tsx: Uso de `window.history.pushState` para agregar vistas al historial del navegador
+  - App.tsx: Listener de evento `popstate` para manejar las flechas atras/adelante del navegador
+  - App.tsx: Funcion `navigateTo` actualiza el estado y el historial del navegador
+  - Cada vista tiene su propia URL (`/dashboard`, `/generate`, `/history`, `/settings`, `/result`)
+  - Las flechas nativas del navegador (Chrome, Firefox, Safari) ahora funcionan correctamente
+  - Header.tsx: Simplificado, sin botones de navegacion custom
 
 - **Logo clickeable en Sidebar:**
-  - Sidebar.tsx: El logo ahora es un boton que navega al Dashboard
+  - Sidebar.tsx: El logo ahora es un boton que llama a `onDisconnect`
+  - Al hacer clic en el logo, desconecta la wallet y vuelve al Landing
   - Hover effect con opacidad reducida para indicar interactividad
 
 ---
@@ -403,7 +405,7 @@ npm run lint     # Linting con ESLint
 
 1. **Integracion x402:** Implementar el SDK buyer de x402 para manejar pagos reales
 2. **Estado global:** Considerar usar Context o Zustand para manejo de estado mas complejo
-3. **Routing:** El proyecto usa navegacion manual con useState; considerar React Router si crece
+3. **Routing:** El proyecto ahora usa Browser History API; considerar React Router para rutas mas complejas
 4. **Testing:** No hay tests implementados actualmente
 5. **CI/CD:** No hay configuracion de deploy automatizado
 
