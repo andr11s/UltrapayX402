@@ -290,6 +290,9 @@ npm run lint     # Linting con ESLint
 - [x] Navegacion entre vistas
 - [x] Diseño responsive
 - [x] Sistema de colores y tipografia
+- [x] Boton de desconexion funcional en todas las vistas
+- [x] Navegacion con flechas atras/adelante en el Header
+- [x] Logo clickeable que lleva al Dashboard
 
 ### Pendiente (por integrar)
 - [ ] Conexion real con wallet x402
@@ -314,6 +317,85 @@ npm run lint     # Linting con ESLint
   - Background: Blanco -> Violeta muy claro (#faf8ff)
   - Componentes actualizados: Landing, Dashboard, Generate, Result, History, Sidebar, Header
   - Soporte para tema oscuro con tonos violetas
+
+- **Mejoras profesionales de UI/UX:**
+
+  **Landing Page:**
+  - Navbar fijo con blur y transparencia
+  - Hero section con efectos de luz animados (blur gradients)
+  - Badge animado "Protocolo x402 Activo"
+  - Titulo con texto gradient animado
+  - Doble CTA (primario y secundario)
+  - Seccion de estadisticas con numeros destacados
+  - Cards de beneficios con hover effects y iconos gradient
+  - Seccion "Como funciona" con iconos grandes y badges numerados
+  - CTA section con gradient de fondo
+  - Footer mejorado con links
+
+  **Dashboard:**
+  - Mensaje de bienvenida personalizado
+  - Grid de 4 stats cards con iconos coloridos
+  - Cards de creacion con hover effects y gradientes
+  - Empty state para historial vacio
+  - Items de historial con badges de tipo (imagen/video)
+  - Thumbnails con zoom en hover
+
+  **Sidebar:**
+  - Logo con gradient y sombra
+  - Menu items con transiciones suaves
+  - Item activo con gradient completo
+  - Seccion de ayuda con CTA
+  - Boton de desconexion
+
+  **Header:**
+  - Backdrop blur sticky
+  - Notificaciones con badge
+  - Balance card con gradient border
+  - Boton de recarga con sombra
+
+  **Generate:**
+  - Header con icono gradient
+  - Sugerencias de prompts clickeables
+  - Selector de modelos con cards visuales
+  - Indicador de modelo seleccionado (checkmark)
+  - Card de resumen sticky
+  - Loading state animado con progress bar
+
+  **Result:**
+  - Vista previa con overlay en hover
+  - Boton de like con estado
+  - Copiar prompt con feedback
+  - Sugerencias de mejora con iconos
+  - Cards de informacion organizadas
+  - Tip pro destacado
+
+  **History:**
+  - Stats cards en la parte superior
+  - Filtros mejorados con contador
+  - Grid de cards con imagenes
+  - Overlay en hover con boton "Ver"
+  - Badges de tipo sobre las imagenes
+  - Empty state para filtros sin resultados
+
+- **Mejora de navegacion - Desconexion desde cualquier vista:**
+  - Sidebar.tsx: Agregado prop `onDisconnect` para manejar la desconexion
+  - App.tsx: Pasa `handleDisconnectWallet` a todos los componentes con Sidebar
+  - Dashboard.tsx: Acepta y pasa `onDisconnect` al Sidebar
+  - Generate.tsx: Acepta y pasa `onDisconnect` al Sidebar
+  - Result.tsx: Acepta y pasa `onDisconnect` al Sidebar
+  - History.tsx: Acepta y pasa `onDisconnect` al Sidebar
+  - Ahora el boton "Desconectar" en el Sidebar funciona en todas las vistas
+
+- **Sistema de navegacion con historial (flechas atras/adelante):**
+  - App.tsx: Agregado estado `viewHistory` y `historyIndex` para rastrear el historial de vistas
+  - App.tsx: Nuevas funciones `navigateTo`, `goBack`, `goForward`, `canGoBack`, `canGoForward`
+  - Header.tsx: Agregadas flechas de navegacion (ChevronLeft/ChevronRight)
+  - Flechas deshabilitadas visualmente cuando no hay historial disponible
+  - Todos los componentes actualizados para pasar props de navegacion al Header
+
+- **Logo clickeable en Sidebar:**
+  - Sidebar.tsx: El logo ahora es un boton que navega al Dashboard
+  - Hover effect con opacidad reducida para indicar interactividad
 
 ---
 

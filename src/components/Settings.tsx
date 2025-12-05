@@ -26,7 +26,7 @@ export function Settings({ isWalletConnected, onNavigate, onDisconnectWallet }: 
 
   return (
     <div className="flex min-h-screen bg-neutral-50">
-      <Sidebar currentView="settings" onNavigate={onNavigate} />
+      <Sidebar currentView="settings" onNavigate={onNavigate} onDisconnect={onDisconnectWallet} />
       
       <div className="flex-1">
         <Header balance={150} onNavigate={onNavigate} />

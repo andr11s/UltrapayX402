@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
 import { Generate } from './components/Generate';
@@ -23,6 +23,25 @@ function App() {
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [balance, setBalance] = useState(150.42);
   const [currentResult, setCurrentResult] = useState<GeneratedContent | null>(null);
+
+  // Escuchar el boton de atras/adelante del navegador
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state?.view) {
+        setCurrentView(event.state.view);
+        if (event.state.view === 'landing') {
+          setIsWalletConnected(false);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    // Establecer el estado inicial
+    window.history.replaceState({ view: 'landing' }, '', '/');
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   const [history, setHistory] = useState<GeneratedContent[]>([
     {
       id: '1',
@@ -56,11 +75,20 @@ function App() {
   const handleConnectWallet = () => {
     setIsWalletConnected(true);
     setCurrentView('dashboard');
+    window.history.pushState({ view: 'dashboard' }, '', '/dashboard');
   };
 
   const handleDisconnectWallet = () => {
     setIsWalletConnected(false);
     setCurrentView('landing');
+    window.history.pushState({ view: 'landing' }, '', '/');
+  };
+
+  const navigateTo = (view: View) => {
+    if (view !== currentView) {
+      setCurrentView(view);
+      window.history.pushState({ view }, '', `/${view === 'landing' ? '' : view}`);
+    }
   };
 
   const handleGenerate = (content: Omit<GeneratedContent, 'id' | 'date'>) => {
@@ -72,7 +100,7 @@ function App() {
     setHistory([newContent, ...history]);
     setBalance(balance - content.cost);
     setCurrentResult(newContent);
-    setCurrentView('result');
+    navigateTo('result');
   };
 
   return (
@@ -83,34 +111,40 @@ function App() {
       {currentView === 'dashboard' && (
         <Dashboard
           balance={balance}
-          onNavigate={setCurrentView}
+          onNavigate={navigateTo}
           history={history.slice(0, 5)}
+          onDisconnect={handleDisconnectWallet}
         />
       )}
       {currentView === 'generate' && (
         <Generate
           balance={balance}
-          onNavigate={setCurrentView}
+          onNavigate={navigateTo}
           onGenerate={handleGenerate}
+          onDisconnect={handleDisconnectWallet}
         />
       )}
       {currentView === 'result' && currentResult && (
         <Result
           content={currentResult}
-          onNavigate={setCurrentView}
-          onRegenerate={() => setCurrentView('generate')}
+          onNavigate={navigateTo}
+          onRegenerate={() => navigateTo('generate')}
+          balance={balance}
+          onDisconnect={handleDisconnectWallet}
         />
       )}
       {currentView === 'history' && (
         <History
           history={history}
-          onNavigate={setCurrentView}
+          onNavigate={navigateTo}
+          balance={balance}
+          onDisconnect={handleDisconnectWallet}
         />
       )}
       {currentView === 'settings' && (
         <Settings
           isWalletConnected={isWalletConnected}
-          onNavigate={setCurrentView}
+          onNavigate={navigateTo}
           onDisconnectWallet={handleDisconnectWallet}
         />
       )}
