@@ -7,7 +7,7 @@ export const config = {
 
   // Modo mock: usar datos simulados cuando el backend no está disponible
   // Cambiar a false cuando el backend esté desplegado
-  useMockData: import.meta.env.VITE_USE_MOCK === 'true' || true,
+  useMockData: import.meta.env.VITE_USE_MOCK === 'true',
 
   // Configuración x402
   x402: {
