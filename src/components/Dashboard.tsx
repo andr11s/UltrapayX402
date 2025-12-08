@@ -30,7 +30,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
           <div className="max-w-7xl mx-auto">
             {/* Welcome Section */}
             <div className="mb-8">
-              <h1 className="text-2xl lg:text-3xl font-bold mb-2">Bienvenido de vuelta</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2 text-foreground">Bienvenido de vuelta</h1>
               <p className="text-muted-foreground">Crea contenido increible con IA hoy</p>
             </div>
 
@@ -55,7 +55,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Imagenes</p>
-                    <p className="text-xl font-bold">{imageCount}</p>
+                    <p className="text-xl font-bold text-foreground">{imageCount}</p>
                   </div>
                 </div>
               </Card>
@@ -67,7 +67,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Videos</p>
-                    <p className="text-xl font-bold">{videoCount}</p>
+                    <p className="text-xl font-bold text-foreground">{videoCount}</p>
                   </div>
                 </div>
               </Card>
@@ -79,7 +79,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Generaciones</p>
-                    <p className="text-xl font-bold">{history.length}</p>
+                    <p className="text-xl font-bold text-foreground">{history.length}</p>
                   </div>
                 </div>
               </Card>
@@ -98,7 +98,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                   <div className="size-14 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-violet-500/25 group-hover:scale-110 transition-transform duration-300">
                     <Image className="size-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Crear imagen</h3>
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">Crear imagen</h3>
                   <p className="text-muted-foreground mb-6">
                     Genera imagenes unicas con modelos como SD3.5, Midjourney y NanoBanana
                   </p>
@@ -122,7 +122,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                   <div className="size-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-pink-500/25 group-hover:scale-110 transition-transform duration-300">
                     <Video className="size-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">Crear video</h3>
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">Crear video</h3>
                   <p className="text-muted-foreground mb-6">
                     Genera videos impresionantes con Veo 3 y Runway Gen-3
                   </p>
@@ -140,7 +140,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
             <div>
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h2 className="text-xl font-semibold">Historial reciente</h2>
+                  <h2 className="text-xl font-semibold text-foreground">Historial reciente</h2>
                   <p className="text-sm text-muted-foreground">Tus ultimas generaciones</p>
                 </div>
                 <Button variant="ghost" onClick={() => onNavigate('history')} className="gap-2">
@@ -154,7 +154,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                     <div className="size-16 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Sparkles className="size-8 text-primary/50" />
                     </div>
-                    <h3 className="font-semibold mb-2">Sin generaciones aun</h3>
+                    <h3 className="font-semibold mb-2 text-foreground">Sin generaciones aun</h3>
                     <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
                       Comienza a crear contenido increible con IA. Tu historial aparecera aqui.
                     </p>
@@ -197,7 +197,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                             )}
                             <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{item.model}</span>
                           </div>
-                          <p className="font-medium truncate mb-1">{item.prompt}</p>
+                          <p className="font-medium truncate mb-1 text-foreground">{item.prompt}</p>
                           <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Clock className="size-3" />

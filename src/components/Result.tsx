@@ -101,7 +101,7 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
 
                 {/* Suggested Re-prompts */}
                 <Card className="p-6 border-border/50">
-                  <h3 className="font-semibold mb-2">Mejora tu resultado</h3>
+                  <h3 className="font-semibold mb-2 text-foreground">Mejora tu resultado</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Prueba estas variaciones basadas en tu prompt original
                   </p>
@@ -132,7 +132,7 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
                 {/* Prompt used */}
                 <Card className="p-6 border-border/50">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold">Prompt utilizado</h3>
+                    <h3 className="font-semibold text-foreground">Prompt utilizado</h3>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -159,7 +159,7 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
 
                 {/* Info */}
                 <Card className="p-6 border-border/50">
-                  <h3 className="font-semibold mb-4">Informacion</h3>
+                  <h3 className="font-semibold mb-4 text-foreground">Informacion</h3>
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
                         <Sparkles className="size-4" />
                         Modelo
                       </span>
-                      <span className="text-sm font-medium">{content.model}</span>
+                      <span className="text-sm font-medium text-foreground">{content.model}</span>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -193,7 +193,7 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
                         <Clock className="size-4" />
                         Fecha
                       </span>
-                      <span className="text-sm font-medium">{content.date}</span>
+                      <span className="text-sm font-medium text-foreground">{content.date}</span>
                     </div>
 
                     <div className="border-t border-border/50 pt-4">
@@ -224,7 +224,7 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
                       <Sparkles className="size-5 text-amber-600" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-sm mb-1">Consejo Pro</h4>
+                      <h4 className="font-medium text-sm mb-1 text-foreground">Consejo Pro</h4>
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         Los prompts detallados con estilo, iluminacion y composicion generan mejores resultados.
                       </p>

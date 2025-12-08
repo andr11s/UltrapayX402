@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Sparkles, Zap, CreditCard, ArrowRight, Play, Shield, Globe, Loader2, AlertCircle, Wallet, LogOut, ChevronDown } from 'lucide-react';
+import { Sparkles, Zap, CreditCard, ArrowRight, Play, Shield, Globe, Loader2, AlertCircle, Wallet, LogOut, ChevronDown, Moon, Sun } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface LandingProps {
   onConnectWallet: () => void;
@@ -15,6 +16,7 @@ interface LandingProps {
 
 export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConnecting = false, isConnected = false, walletAddress, error }: LandingProps) {
   const [showWalletMenu, setShowWalletMenu] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const benefits = [
     {
@@ -66,7 +68,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden">
+    <div className="min-h-screen overflow-hidden bg-background">
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
         <div className="container mx-auto px-4 py-4">
@@ -75,9 +77,22 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
               <div className="size-9 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/25">
                 <Sparkles className="size-5 text-white" />
               </div>
-              <span className="font-semibold text-lg">UltraPayx402</span>
+              <span className="font-semibold text-lg text-foreground">UltraPayx402</span>
             </div>
             <div className="flex items-center gap-3">
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                className="size-9 rounded-xl bg-secondary/50 hover:bg-secondary flex items-center justify-center transition-colors"
+                title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="size-4 text-muted-foreground" />
+                ) : (
+                  <Moon className="size-4 text-muted-foreground" />
+                )}
+              </button>
+
               {isConnected && walletAddress && (
                 <div className="relative">
                   <button
@@ -87,10 +102,10 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
                     <div className="size-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-md flex items-center justify-center">
                       <Wallet className="size-3 text-white" />
                     </div>
-                    <span className="font-mono text-sm text-green-700">
+                    <span className="font-mono text-sm text-green-700 dark:text-green-400">
                       {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
                     </span>
-                    <ChevronDown className={`size-4 text-green-700 transition-transform ${showWalletMenu ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`size-4 text-green-700 dark:text-green-400 transition-transform ${showWalletMenu ? 'rotate-180' : ''}`} />
                   </button>
 
                   {/* Dropdown menu */}
@@ -106,7 +121,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
                             setShowWalletMenu(false);
                             onGoToDashboard?.();
                           }}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-secondary flex items-center gap-2"
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-secondary flex items-center gap-2 text-foreground"
                         >
                           <ArrowRight className="size-4" />
                           Ir al Dashboard
@@ -116,7 +131,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
                             setShowWalletMenu(false);
                             onDisconnect?.();
                           }}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 flex items-center gap-2"
                         >
                           <LogOut className="size-4" />
                           Desconectar
@@ -162,13 +177,13 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-full mb-8 backdrop-blur-sm">
               <div className="size-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-sm font-medium text-violet-700">Protocolo x402 Activo</span>
+              <span className="text-sm font-medium text-violet-700 dark:text-violet-400">Protocolo x402 Activo</span>
             </div>
 
             {/* Heading */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-foreground">
               Genera contenido IA{' '}
-              <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
                 pagando por uso
               </span>
             </h1>
@@ -250,7 +265,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
             {/* Section header */}
             <div className="text-center mb-16">
               <span className="text-sm font-semibold text-primary uppercase tracking-wider">Ventajas</span>
-              <h2 className="text-3xl md:text-4xl font-bold mt-3 mb-4">Por que elegir UltraPayx402</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mt-3 mb-4 text-foreground">Por que elegir UltraPayx402</h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
                 La forma mas inteligente de acceder a generacion de contenido con IA
               </p>
@@ -268,7 +283,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
                     <div className={`size-14 bg-gradient-to-br ${benefit.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                       <Icon className="size-7 text-white" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-3">{benefit.title}</h3>
+                    <h3 className="text-xl font-semibold mb-3 text-foreground">{benefit.title}</h3>
                     <p className="text-muted-foreground leading-relaxed">{benefit.description}</p>
                   </Card>
                 );
@@ -285,7 +300,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
             {/* Section header */}
             <div className="text-center mb-16">
               <span className="text-sm font-semibold text-primary uppercase tracking-wider">Proceso</span>
-              <h2 className="text-3xl md:text-4xl font-bold mt-3 mb-4">Como funciona</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mt-3 mb-4 text-foreground">Como funciona</h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
                 Tres simples pasos para comenzar a generar contenido
               </p>
@@ -309,7 +324,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
                         {step.number}
                       </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                    <h3 className="text-xl font-semibold mb-3 text-foreground">{step.title}</h3>
                     <p className="text-muted-foreground leading-relaxed max-w-xs mx-auto">{step.description}</p>
                   </div>
                 );
@@ -415,7 +430,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
                   <Sparkles className="size-5 text-white" />
                 </div>
                 <div>
-                  <span className="font-semibold">UltraPayx402</span>
+                  <span className="font-semibold text-foreground">UltraPayx402</span>
                   <p className="text-xs text-muted-foreground">Generacion IA con micropagos</p>
                 </div>
               </div>

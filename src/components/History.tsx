@@ -53,7 +53,7 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
                 <div className="size-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
                   <Clock className="size-5 text-white" />
                 </div>
-                <h1 className="text-2xl lg:text-3xl font-bold">Historial</h1>
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Historial</h1>
               </div>
               <p className="text-muted-foreground">Todas tus generaciones en un solo lugar</p>
             </div>
@@ -67,7 +67,7 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total</p>
-                    <p className="text-2xl font-bold">{history.length}</p>
+                    <p className="text-2xl font-bold text-foreground">{history.length}</p>
                   </div>
                 </div>
               </Card>
@@ -91,7 +91,7 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Promedio</p>
-                    <p className="text-2xl font-bold">{avgCost.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">x402</span></p>
+                    <p className="text-2xl font-bold text-foreground">{avgCost.toFixed(2)} <span className="text-sm font-normal text-muted-foreground">x402</span></p>
                   </div>
                 </div>
               </Card>
@@ -149,7 +149,7 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
                   <div className="size-16 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Search className="size-8 text-primary/50" />
                   </div>
-                  <h3 className="font-semibold mb-2">No se encontraron resultados</h3>
+                  <h3 className="font-semibold mb-2 text-foreground">No se encontraron resultados</h3>
                   <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
                     {hasFilters
                       ? 'Intenta ajustar los filtros para ver mas resultados.'
@@ -207,7 +207,7 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
 
                     {/* Content */}
                     <div className="p-4">
-                      <p className="font-medium text-sm line-clamp-2 mb-2">{item.prompt}</p>
+                      <p className="font-medium text-sm line-clamp-2 mb-2 text-foreground">{item.prompt}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-xs bg-secondary px-2 py-0.5 rounded-full text-muted-foreground">{item.model}</span>

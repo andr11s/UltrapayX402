@@ -209,7 +209,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
                 <div className="size-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
                   <Wand2 className="size-5 text-white" />
                 </div>
-                <h1 className="text-2xl lg:text-3xl font-bold">Crear contenido</h1>
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Crear contenido</h1>
               </div>
               <p className="text-muted-foreground">Describe tu vision y deja que la IA la haga realidad</p>
             </div>
@@ -222,7 +222,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
                     <Wallet className={`size-5 ${walletState.isConnected ? 'text-green-600' : 'text-yellow-600'}`} />
                     {walletState.isConnected ? (
                       <div>
-                        <p className="text-sm font-medium text-green-700">Wallet conectada</p>
+                        <p className="text-sm font-medium text-green-700 dark:text-green-400">Wallet conectada</p>
                         <p className="text-xs text-muted-foreground">
                           {walletState.address?.slice(0, 6)}...{walletState.address?.slice(-4)}
                           {' | '}Red: {walletState.chainId === 84532 ? 'Base Sepolia' : walletState.chainId === 8453 ? 'Base' : `Chain ${walletState.chainId}`}
@@ -230,7 +230,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
                       </div>
                     ) : (
                       <div>
-                        <p className="text-sm font-medium text-yellow-700">Wallet no conectada</p>
+                        <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Wallet no conectada</p>
                         <p className="text-xs text-muted-foreground">Conecta tu wallet para realizar pagos x402</p>
                       </div>
                     )}
@@ -257,7 +257,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
             {/* Mock Mode Banner */}
             {isUsingMock && (
               <Card className="p-4 mb-6 border-blue-500/50 bg-blue-500/10">
-                <div className="flex items-center gap-2 text-blue-700">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
                   <AlertCircle className="size-5" />
                   <p className="text-sm">
                     <strong>Modo Demo:</strong> Los pagos y generaciones son simulados.
@@ -410,7 +410,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
               {/* Cost Card - Sticky */}
               <div className="lg:col-span-1">
                 <Card className="p-6 border-border/50 sticky top-24">
-                  <h3 className="font-semibold mb-4">Resumen</h3>
+                  <h3 className="font-semibold mb-4 text-foreground">Resumen</h3>
 
                   {/* Cost display */}
                   <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-xl p-5 mb-6 border border-primary/20">
@@ -477,7 +477,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
 
                   {!isUsingMock && !walletState.isConnected && (
                     <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                      <p className="text-sm text-yellow-700 flex items-center gap-2">
+                      <p className="text-sm text-yellow-700 dark:text-yellow-400 flex items-center gap-2">
                         <Wallet className="size-4" />
                         Conecta tu wallet para generar
                       </p>
@@ -510,7 +510,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
                       <Loader2 className="size-4 text-white animate-spin" />
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">
+                  <h3 className="text-xl font-semibold mb-2 text-foreground">
                     {generationStep || 'Procesando tu solicitud'}
                   </h3>
                   <p className="text-muted-foreground mb-4">

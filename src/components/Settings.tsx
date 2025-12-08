@@ -7,9 +7,10 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Wallet, CheckCircle2, XCircle } from 'lucide-react';
+import { Wallet, CheckCircle2, XCircle, Moon, Sun } from 'lucide-react';
 import type { View } from '../App';
 import type { WalletState } from '../services/x402';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SettingsProps {
   isWalletConnected: boolean;
@@ -24,11 +25,12 @@ export function Settings({ isWalletConnected, onNavigate, onDisconnectWallet, wa
   const [monthlyLimit, setMonthlyLimit] = useState('100');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
-  
+  const { theme, setTheme } = useTheme();
+
   const favoriteModels = ['SD3.5', 'Midjourney', 'Veo 3'];
 
   return (
-    <div className="flex min-h-screen bg-neutral-50">
+    <div className="flex min-h-screen bg-background">
       <Sidebar currentView="settings" onNavigate={onNavigate} onDisconnect={onDisconnectWallet} />
       
       <div className="flex-1">
@@ -36,34 +38,34 @@ export function Settings({ isWalletConnected, onNavigate, onDisconnectWallet, wa
         
         <main className="p-8">
           <div className="max-w-4xl mx-auto">
-            <h1 className="mb-8">Configuración</h1>
+            <h1 className="mb-8 text-foreground">Configuración</h1>
             
             <div className="space-y-6">
               {/* Wallet Connection */}
-              <Card className="p-6 border-neutral-200">
-                <h3 className="mb-4">Wallet x402</h3>
+              <Card className="p-6 border-border">
+                <h3 className="mb-4 text-foreground">Wallet x402</h3>
                 
-                <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="size-10 bg-neutral-900 rounded-lg flex items-center justify-center">
-                      <Wallet className="size-5 text-white" />
+                    <div className="size-10 bg-primary rounded-lg flex items-center justify-center">
+                      <Wallet className="size-5 text-primary-foreground" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         {isWalletConnected ? (
                           <>
                             <CheckCircle2 className="size-4 text-green-600" />
-                            <span>Conectada</span>
+                            <span className="text-foreground">Conectada</span>
                           </>
                         ) : (
                           <>
                             <XCircle className="size-4 text-red-600" />
-                            <span>Desconectada</span>
+                            <span className="text-foreground">Desconectada</span>
                           </>
                         )}
                       </div>
                       {isWalletConnected && walletAddress && (
-                        <div className="text-sm text-neutral-600 font-mono">
+                        <div className="text-sm text-muted-foreground font-mono">
                           {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
                         </div>
                       )}
@@ -81,9 +83,9 @@ export function Settings({ isWalletConnected, onNavigate, onDisconnectWallet, wa
               </Card>
 
               {/* Spending Limits */}
-              <Card className="p-6 border-neutral-200">
-                <h3 className="mb-4">Límites de gasto</h3>
-                <p className="text-neutral-600 mb-6">
+              <Card className="p-6 border-border">
+                <h3 className="mb-4 text-foreground">Límites de gasto</h3>
+                <p className="text-muted-foreground mb-6">
                   Establece límites para controlar tu gasto en generaciones de IA
                 </p>
                 
@@ -112,10 +114,10 @@ export function Settings({ isWalletConnected, onNavigate, onDisconnectWallet, wa
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div>
-                      <div className="mb-1">Alertas de límite</div>
-                      <div className="text-sm text-neutral-600">
+                      <div className="mb-1 text-foreground">Alertas de límite</div>
+                      <div className="text-sm text-muted-foreground">
                         Recibe notificaciones al alcanzar el 80% del límite
                       </div>
                     </div>
@@ -125,16 +127,16 @@ export function Settings({ isWalletConnected, onNavigate, onDisconnectWallet, wa
               </Card>
 
               {/* Favorite Models */}
-              <Card className="p-6 border-neutral-200">
-                <h3 className="mb-4">Modelos favoritos</h3>
-                <p className="text-neutral-600 mb-6">
+              <Card className="p-6 border-border">
+                <h3 className="mb-4 text-foreground">Modelos favoritos</h3>
+                <p className="text-muted-foreground mb-6">
                   Selecciona tus modelos preferidos para acceso rápido
                 </p>
                 
                 <div className="space-y-3">
                   {favoriteModels.map((model) => (
-                    <div key={model} className="flex items-center justify-between p-3 border border-neutral-200 rounded-lg">
-                      <span>{model}</span>
+                    <div key={model} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                      <span className="text-foreground">{model}</span>
                       <Button variant="ghost" size="sm">Eliminar</Button>
                     </div>
                   ))}
@@ -144,32 +146,38 @@ export function Settings({ isWalletConnected, onNavigate, onDisconnectWallet, wa
               </Card>
 
               {/* Interface Preferences */}
-              <Card className="p-6 border-neutral-200">
-                <h3 className="mb-4">Preferencias de interfaz</h3>
-                
+              <Card className="p-6 border-border">
+                <h3 className="mb-4 text-foreground">Preferencias de interfaz</h3>
+
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
                     <div>
-                      <div className="mb-1">Guardar automáticamente</div>
-                      <div className="text-sm text-neutral-600">
+                      <div className="mb-1 text-foreground">Guardar automáticamente</div>
+                      <div className="text-sm text-muted-foreground">
                         Guardar todas las generaciones en el historial
                       </div>
                     </div>
                     <Switch checked={autoSave} onCheckedChange={setAutoSave} />
                   </div>
 
-                  <div>
-                    <Label htmlFor="theme" className="mb-2 block">Tema de la aplicación</Label>
-                    <Select defaultValue="light">
-                      <SelectTrigger id="theme">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Claro</SelectItem>
-                        <SelectItem value="dark">Oscuro</SelectItem>
-                        <SelectItem value="auto">Automático</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {theme === 'dark' ? (
+                        <Moon className="size-5 text-primary" />
+                      ) : (
+                        <Sun className="size-5 text-primary" />
+                      )}
+                      <div>
+                        <div className="mb-1 text-foreground">Modo oscuro</div>
+                        <div className="text-sm text-muted-foreground">
+                          Cambia entre tema claro y oscuro
+                        </div>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={theme === 'dark'}
+                      onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                    />
                   </div>
 
                   <div>

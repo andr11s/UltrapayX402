@@ -27,7 +27,7 @@ export function Sidebar({ currentView, onNavigate, onDisconnect }: SidebarProps)
             <Wallet className="size-5 text-white" />
           </div>
           <div>
-            <span className="font-semibold text-lg">UltraPayx402</span>
+            <span className="font-semibold text-lg text-foreground">UltraPayx402</span>
             <p className="text-xs text-muted-foreground">Micropagos IA</p>
           </div>
         </button>
@@ -61,7 +61,7 @@ export function Sidebar({ currentView, onNavigate, onDisconnect }: SidebarProps)
       {/* Bottom section */}
       <div className="p-4 border-t border-border/50">
         <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-xl p-4 mb-4">
-          <p className="text-sm font-medium mb-1">Necesitas ayuda?</p>
+          <p className="text-sm font-medium mb-1 text-foreground">Necesitas ayuda?</p>
           <p className="text-xs text-muted-foreground mb-3">Consulta nuestra documentacion</p>
           <a href="#" className="text-xs text-primary font-medium hover:underline">
             Ver guia rapida →
