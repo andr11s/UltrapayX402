@@ -70,11 +70,24 @@ class PaymentService {
   }
 
   /**
-   * Verifica si hay una wallet instalada
+   * Verifica si hay una wallet instalada y selecciona la más adecuada
    */
   private checkForWallet() {
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
-      this.provider = (window as any).ethereum;
+    if (typeof window === 'undefined') return;
+
+    const windowEth = (window as any).ethereum;
+    if (!windowEth) return;
+
+    // Si hay múltiples wallets, priorizar MetaMask
+    if (windowEth.providers?.length > 0) {
+      // Buscar MetaMask primero
+      this.provider = windowEth.providers.find((p: any) => p.isMetaMask) 
+        || windowEth.providers[0];
+    } else {
+      this.provider = windowEth;
+    }
+
+    if (this.provider) {
       this.ethersProvider = new BrowserProvider(this.provider);
       this.setupWalletListeners();
     }
@@ -107,14 +120,19 @@ class PaymentService {
    * Conecta la wallet del usuario
    */
   async connectWallet(): Promise<void> {
+    // Reintentar detectar wallet en caso de que se haya instalado después
     if (!this.provider) {
-      throw new Error('No se encontró MetaMask. Por favor instala MetaMask.');
+      this.checkForWallet();
+    }
+
+    if (!this.provider) {
+      throw new Error('No se encontró una wallet compatible. Por favor instala MetaMask, Core, o WalletConnect.');
     }
 
     try {
       this.updateState({ currentStep: 'connecting', isProcessing: true });
 
-      // Solicitar cuentas de MetaMask
+      // Solicitar cuentas
       const accounts = await this.provider.request({ method: 'eth_requestAccounts' });
 
       if (accounts.length > 0) {
@@ -391,6 +409,21 @@ class PaymentService {
    */
   isConnected(): boolean {
     return this.state.isConnected;
+  }
+
+  /**
+   * Obtiene información sobre la wallet conectada
+   */
+  getWalletInfo(): { name: string; isMetaMask: boolean; isCore: boolean } | null {
+    if (!this.provider) return null;
+
+    return {
+      name: this.provider.isMetaMask ? 'MetaMask' : 
+            this.provider.isCoreWallet ? 'Core Wallet' : 
+            'Web3 Wallet',
+      isMetaMask: !!this.provider.isMetaMask,
+      isCore: !!this.provider.isCoreWallet
+    };
   }
 }
 

@@ -143,10 +143,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect }: GenerateProps
       <Sidebar currentView="generate" onNavigate={onNavigate} onDisconnect={onDisconnect} />
 
       <div className="flex-1">
-        <Header walletAddress={walletState.address} onNavigate={onNavigate} onWalletChange={(state) => {
-          setWalletState(state);
-          if (onWalletChange) onWalletChange(state);
-        }} onDisconnect={onDisconnect} />
+        <Header walletAddress={walletAddress} onNavigate={onNavigate} />
 
         <main className="p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
