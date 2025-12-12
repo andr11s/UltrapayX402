@@ -21,16 +21,22 @@ import { config } from '../config';
 
 interface GenerateProps {
   onNavigate: (view: View) => void;
-  onGenerate: (content: Omit<GeneratedContent, 'id' | 'date'>) => void;
+  onGenerate: (content: Omit<GeneratedContent, 'date'>) => void;
   onDisconnect: () => void;
   onWalletChange?: (state: WalletState) => void;
+  regenerateData?: {
+    prompt: string;
+    type: 'image' | 'video';
+    model: string;
+  } | null;
+  onClearRegenerateData?: () => void;
 }
 
 const resolutions = ['512x512', '1024x1024', '1920x1080', '2048x2048'];
 const durations = ['5s', '10s', '15s', '30s'];
 const styles = ['Realista', 'Artistico', 'Anime', 'Abstracto', '3D Render', 'Cinematico'];
 
-export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange }: GenerateProps) {
+export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange, regenerateData, onClearRegenerateData }: GenerateProps) {
   const [prompt, setPrompt] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [resolution, setResolution] = useState('1024x1024');
@@ -39,6 +45,7 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generationStep, setGenerationStep] = useState<string>('');
+  const [isRegenerateMode, setIsRegenerateMode] = useState(false);
 
   // Estado para proveedores cargados desde el backend
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -62,7 +69,22 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
         const response = await api.getProviders();
         setProviders(response.providers);
 
-        if (response.providers.length > 0) {
+        // Si hay datos de regeneracion, usar esos valores
+        if (regenerateData) {
+          setPrompt(regenerateData.prompt);
+          // Buscar el modelo por nombre (model en regenerateData es el providerName)
+          const matchingProvider = response.providers.find(
+            p => p.name === regenerateData.model || p.id === regenerateData.model
+          );
+          if (matchingProvider) {
+            setSelectedModel(matchingProvider.id);
+          } else if (response.providers.length > 0) {
+            // Si no encuentra el modelo, usar el primero del mismo tipo
+            const sameTypeProvider = response.providers.find(p => p.type === regenerateData.type);
+            setSelectedModel(sameTypeProvider?.id || response.providers[0].id);
+          }
+          setIsRegenerateMode(true);
+        } else if (response.providers.length > 0) {
           setSelectedModel(response.providers[0].id);
         }
       } catch (err) {
@@ -80,7 +102,17 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
     }
 
     init();
-  }, []);
+  }, [regenerateData]);
+
+  // Efecto para auto-generar cuando estamos en modo regenerate y la wallet esta conectada
+  useEffect(() => {
+    if (isRegenerateMode && walletState.isConnected && !isGenerating && prompt && selectedModel && !isLoadingProviders) {
+      // Auto-iniciar la generacion en modo regenerate
+      handleGenerate();
+      setIsRegenerateMode(false);
+      onClearRegenerateData?.();
+    }
+  }, [isRegenerateMode, walletState.isConnected, isGenerating, prompt, selectedModel, isLoadingProviders]);
 
   const currentModel = providers.find(m => m.id === selectedModel);
   const estimatedCost = currentModel?.price || 0;
@@ -137,13 +169,14 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
           {
             prompt,
             type: currentModel.type,
-            provider: currentModel.id
+            provider: currentModel.id,
+            walletAddress: walletState.address || '0x0000000000000000000000000000000000000000'
           },
           fetch // En mock no se usa realmente
         );
       } else {
         // Modo real: usar x402-fetch con pago automatico
-        if (!walletState.isConnected) {
+        if (!walletState.isConnected || !walletState.address) {
           throw new Error('Wallet no conectada');
         }
 
@@ -158,7 +191,8 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
           {
             prompt,
             type: currentModel.type,
-            provider: currentModel.id
+            provider: currentModel.id,
+            walletAddress: walletState.address // Enviar wallet para historial personal
           },
           paymentFetch
         );
@@ -166,13 +200,15 @@ export function Generate({ onNavigate, onGenerate, onDisconnect, onWalletChange 
 
       setGenerationStep('Completado!');
 
-      // Notificar resultado
+      // Notificar resultado con el transactionId del backend
       onGenerate({
+        id: result.transactionId,
         prompt,
         type: currentModel.type,
         model: currentModel.name,
-        cost: estimatedCost,
+        cost: result.price || estimatedCost,
         url: result.mediaUrl,
+        isFavorite: false,
       });
 
     } catch (err) {

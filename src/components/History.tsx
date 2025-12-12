@@ -5,7 +5,8 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
-import { Image, Video, Eye, TrendingUp, Layers, Clock, X, Search } from 'lucide-react';
+import { Image, Video, Eye, TrendingUp, Layers, Clock, X, Search, Heart, Loader2 } from 'lucide-react';
+import { ImageModal } from './ImageModal';
 import type { View, GeneratedContent } from '../App';
 import type { WalletState } from '../services/x402';
 
@@ -15,13 +16,25 @@ interface HistoryProps {
   onDisconnect: () => void;
   walletAddress?: string | null;
   onWalletChange?: (state: WalletState) => void;
+  onToggleFavorite: (id: string) => Promise<void>;
 }
 
-export function History({ history, onNavigate, onDisconnect, walletAddress, onWalletChange }: HistoryProps) {
+type TabType = 'all' | 'favorites';
+
+export function History({ history, onNavigate, onDisconnect, walletAddress, onWalletChange, onToggleFavorite }: HistoryProps) {
+  const [activeTab, setActiveTab] = useState<TabType>('all');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterModel, setFilterModel] = useState<string>('all');
+  const [togglingFavorite, setTogglingFavorite] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<GeneratedContent | null>(null);
 
-  const filteredHistory = history.filter((item) => {
+  // Primero filtrar por tab (all o favorites)
+  const tabFilteredHistory = activeTab === 'favorites'
+    ? history.filter(item => item.isFavorite)
+    : history;
+
+  // Luego aplicar los otros filtros
+  const filteredHistory = tabFilteredHistory.filter((item) => {
     const typeMatch = filterType === 'all' || item.type === filterType;
     const modelMatch = filterModel === 'all' || item.model === filterModel;
     return typeMatch && modelMatch;
@@ -30,6 +43,7 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
   const uniqueModels = Array.from(new Set(history.map(item => item.model)));
   const totalSpent = history.reduce((sum, item) => sum + item.cost, 0);
   const avgCost = history.length > 0 ? totalSpent / history.length : 0;
+  const favoritesCount = history.filter(item => item.isFavorite).length;
 
   const clearFilters = () => {
     setFilterType('all');
@@ -37,6 +51,16 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
   };
 
   const hasFilters = filterType !== 'all' || filterModel !== 'all';
+
+  const handleToggleFavorite = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Evitar que se active el click en la card
+    setTogglingFavorite(id);
+    try {
+      await onToggleFavorite(id);
+    } finally {
+      setTogglingFavorite(null);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -56,6 +80,26 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
                 <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Historial</h1>
               </div>
               <p className="text-muted-foreground">Todas tus generaciones en un solo lugar</p>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6">
+              <Button
+                variant={activeTab === 'all' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('all')}
+                className="gap-2"
+              >
+                <Layers className="size-4" />
+                Todas ({history.length})
+              </Button>
+              <Button
+                variant={activeTab === 'favorites' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('favorites')}
+                className={`gap-2 ${activeTab === 'favorites' ? 'bg-pink-600 hover:bg-pink-700' : ''}`}
+              >
+                <Heart className={`size-4 ${activeTab === 'favorites' ? 'fill-current' : ''}`} />
+                Favoritos ({favoritesCount})
+              </Button>
             </div>
 
             {/* Stats Cards */}
@@ -146,16 +190,34 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
             {filteredHistory.length === 0 ? (
               <Card className="p-12 border-border/50 border-dashed">
                 <div className="text-center">
-                  <div className="size-16 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Search className="size-8 text-primary/50" />
+                  <div className={`size-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+                    activeTab === 'favorites'
+                      ? 'bg-gradient-to-br from-pink-500/10 to-rose-500/10'
+                      : 'bg-gradient-to-br from-violet-500/10 to-purple-500/10'
+                  }`}>
+                    {activeTab === 'favorites' ? (
+                      <Heart className="size-8 text-pink-500/50" />
+                    ) : (
+                      <Search className="size-8 text-primary/50" />
+                    )}
                   </div>
-                  <h3 className="font-semibold mb-2 text-foreground">No se encontraron resultados</h3>
+                  <h3 className="font-semibold mb-2 text-foreground">
+                    {activeTab === 'favorites'
+                      ? 'No tienes favoritos'
+                      : 'No se encontraron resultados'}
+                  </h3>
                   <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                    {hasFilters
-                      ? 'Intenta ajustar los filtros para ver mas resultados.'
-                      : 'Aun no tienes generaciones. Comienza a crear contenido!'}
+                    {activeTab === 'favorites'
+                      ? 'Marca tus generaciones favoritas haciendo click en el corazon para encontrarlas facilmente.'
+                      : hasFilters
+                        ? 'Intenta ajustar los filtros para ver mas resultados.'
+                        : 'Aun no tienes generaciones. Comienza a crear contenido!'}
                   </p>
-                  {hasFilters ? (
+                  {activeTab === 'favorites' ? (
+                    <Button variant="outline" onClick={() => setActiveTab('all')}>
+                      Ver todas las generaciones
+                    </Button>
+                  ) : hasFilters ? (
                     <Button variant="outline" onClick={clearFilters}>
                       Limpiar filtros
                     </Button>
@@ -172,6 +234,7 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
                   <Card
                     key={item.id}
                     className="group overflow-hidden border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+                    onClick={() => setSelectedImage(item)}
                   >
                     {/* Image */}
                     <div className="aspect-video bg-secondary relative overflow-hidden">
@@ -189,6 +252,22 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
                           </Button>
                         </div>
                       </div>
+                      {/* Favorite button */}
+                      <button
+                        onClick={(e) => handleToggleFavorite(e, item.id)}
+                        disabled={togglingFavorite === item.id}
+                        className={`absolute top-3 right-3 size-8 rounded-full flex items-center justify-center transition-all ${
+                          item.isFavorite
+                            ? 'bg-pink-500 text-white'
+                            : 'bg-black/50 text-white hover:bg-pink-500'
+                        }`}
+                      >
+                        {togglingFavorite === item.id ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Heart className={`size-4 ${item.isFavorite ? 'fill-current' : ''}`} />
+                        )}
+                      </button>
                       {/* Type badge */}
                       <div className="absolute top-3 left-3">
                         {item.type === 'image' ? (
@@ -223,6 +302,23 @@ export function History({ history, onNavigate, onDisconnect, walletAddress, onWa
           </div>
         </main>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <ImageModal
+          content={selectedImage}
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          onToggleFavorite={async (id) => {
+            await onToggleFavorite(id);
+            // Actualizar el estado local del modal
+            const updated = history.find(h => h.id === id);
+            if (updated) {
+              setSelectedImage({ ...updated, isFavorite: !updated.isFavorite });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

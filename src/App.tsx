@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Landing } from './components/Landing';
 import { Dashboard } from './components/Dashboard';
 import { Generate } from './components/Generate';
@@ -13,6 +13,7 @@ import {
   onWalletChange,
   type WalletState
 } from './services/x402';
+import { api } from './services/api';
 
 export type View = 'landing' | 'dashboard' | 'generate' | 'result' | 'history' | 'settings';
 
@@ -24,6 +25,7 @@ export interface GeneratedContent {
   date: string;
   cost: number;
   url: string;
+  isFavorite?: boolean;
 }
 
 // Obtener la vista inicial desde la URL
@@ -92,8 +94,48 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Historia de generaciones (empieza vacia, se llena con uso real)
+  // Historia de generaciones (se carga desde el backend por wallet)
   const [history, setHistory] = useState<GeneratedContent[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  // Funcion para cargar historial desde el backend
+  const loadHistoryFromBackend = useCallback(async (walletAddress: string) => {
+    if (!walletAddress) return;
+
+    setIsLoadingHistory(true);
+    try {
+      const response = await api.getHistory(walletAddress);
+      if (response.success && response.transactions) {
+        // Convertir transacciones del backend al formato GeneratedContent
+        const historyItems: GeneratedContent[] = response.transactions.map(tx => ({
+          id: tx.transactionId,
+          prompt: tx.prompt,
+          type: tx.type,
+          model: tx.providerName || tx.provider,
+          date: tx.createdAt.split('T')[0],
+          cost: tx.price,
+          url: tx.mediaUrl,
+          isFavorite: tx.isFavorite || false
+        }));
+        setHistory(historyItems);
+      }
+    } catch (error) {
+      console.error('Error loading history:', error);
+      // No mostrar error al usuario, simplemente mantener historial vacio
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  // Cargar historial cuando cambia la wallet
+  useEffect(() => {
+    if (walletState.isConnected && walletState.address) {
+      loadHistoryFromBackend(walletState.address);
+    } else {
+      // Limpiar historial cuando se desconecta
+      setHistory([]);
+    }
+  }, [walletState.address, walletState.isConnected, loadHistoryFromBackend]);
 
   // Conectar wallet real
   const handleConnectWallet = async () => {
@@ -137,15 +179,49 @@ function App() {
     }
   };
 
-  const handleGenerate = (content: Omit<GeneratedContent, 'id' | 'date'>) => {
+  const handleGenerate = (content: Omit<GeneratedContent, 'date'>) => {
     const newContent: GeneratedContent = {
       ...content,
-      id: Date.now().toString(),
       date: new Date().toISOString().split('T')[0],
     };
     setHistory([newContent, ...history]);
     setCurrentResult(newContent);
     navigateTo('result');
+  };
+
+  // Estado para regeneracion
+  const [regenerateData, setRegenerateData] = useState<{
+    prompt: string;
+    type: 'image' | 'video';
+    model: string;
+  } | null>(null);
+
+  // Funcion para regenerar una imagen (redirige a Generate con datos precargados)
+  const handleRegenerate = async (prompt: string, type: 'image' | 'video', model: string) => {
+    setRegenerateData({ prompt, type, model });
+    navigateTo('generate');
+  };
+
+  // Funcion para marcar/desmarcar favorito
+  const handleToggleFavorite = async (id: string) => {
+    if (!walletState.address) return;
+
+    try {
+      // Llamar al backend para actualizar favorito
+      const result = await api.toggleFavorite(id, walletState.address);
+
+      // Actualizar el estado local
+      setHistory(prev => prev.map(item =>
+        item.id === id ? { ...item, isFavorite: result.isFavorite } : item
+      ));
+
+      // Actualizar currentResult si es el mismo item
+      if (currentResult && currentResult.id === id) {
+        setCurrentResult({ ...currentResult, isFavorite: result.isFavorite });
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
   };
 
   return (
@@ -168,6 +244,7 @@ function App() {
           onDisconnect={handleDisconnectWallet}
           walletAddress={walletState.address}
           onWalletChange={setWalletState}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
       {currentView === 'generate' && (
@@ -176,13 +253,16 @@ function App() {
           onGenerate={handleGenerate}
           onDisconnect={handleDisconnectWallet}
           onWalletChange={setWalletState}
+          regenerateData={regenerateData}
+          onClearRegenerateData={() => setRegenerateData(null)}
         />
       )}
       {currentView === 'result' && currentResult && (
         <Result
           content={currentResult}
           onNavigate={navigateTo}
-          onRegenerate={() => navigateTo('generate')}
+          onRegenerate={handleRegenerate}
+          onToggleFavorite={handleToggleFavorite}
           onDisconnect={handleDisconnectWallet}
           walletAddress={walletState.address}
           onWalletChange={setWalletState}
@@ -195,6 +275,7 @@ function App() {
           onDisconnect={handleDisconnectWallet}
           walletAddress={walletState.address}
           onWalletChange={setWalletState}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
       {currentView === 'settings' && (

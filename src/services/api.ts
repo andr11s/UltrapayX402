@@ -32,6 +32,7 @@ export interface GenerateRequest {
   prompt: string;
   type: 'image' | 'video';
   provider?: string;
+  walletAddress: string; // Wallet del usuario que genera
 }
 
 export interface GenerateResponse {
@@ -63,6 +64,33 @@ export interface HealthResponse {
   status: string;
   service: string;
   timestamp: string;
+}
+
+export interface HistoryTransaction {
+  transactionId: string;
+  walletAddress: string;
+  prompt: string;
+  type: 'image' | 'video';
+  provider: string;
+  providerName: string;
+  price: number;
+  paymentHash: string;
+  mediaUrl: string;
+  isFavorite: boolean;
+  createdAt: string;
+}
+
+export interface ToggleFavoriteResponse {
+  success: boolean;
+  transactionId: string;
+  isFavorite: boolean;
+}
+
+export interface HistoryResponse {
+  success: boolean;
+  walletAddress: string;
+  count: number;
+  transactions: HistoryTransaction[];
 }
 
 // ============================================
@@ -278,6 +306,38 @@ class ApiService {
   // Verificar si esta en modo mock
   isUsingMock(): boolean {
     return this.useMock;
+  }
+
+  // Obtener historial de una wallet
+  async getHistory(walletAddress: string, limit: number = 50): Promise<HistoryResponse> {
+    if (this.useMock) {
+      // Simular delay de red
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return {
+        success: true,
+        walletAddress: walletAddress.toLowerCase(),
+        count: 0,
+        transactions: []
+      };
+    }
+    return this.request<HistoryResponse>(`/history/${walletAddress}?limit=${limit}`);
+  }
+
+  // Toggle favorito de una transaccion
+  async toggleFavorite(transactionId: string, walletAddress: string): Promise<ToggleFavoriteResponse> {
+    if (this.useMock) {
+      // Simular delay de red
+      await new Promise(resolve => setTimeout(resolve, 200));
+      return {
+        success: true,
+        transactionId,
+        isFavorite: true // Simular toggle
+      };
+    }
+    return this.request<ToggleFavoriteResponse>(`/favorite/${transactionId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ walletAddress }),
+    });
   }
 
   /**

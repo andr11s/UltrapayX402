@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Image, Video, TrendingUp, Sparkles, ArrowRight, Clock, Zap } from 'lucide-react';
+import { ImageModal } from './ImageModal';
 import type { View, GeneratedContent } from '../App';
 import type { WalletState } from '../services/x402';
 
@@ -12,9 +14,11 @@ interface DashboardProps {
   onDisconnect: () => void;
   walletAddress?: string | null;
   onWalletChange?: (state: WalletState) => void;
+  onToggleFavorite: (id: string) => Promise<void>;
 }
 
-export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, onWalletChange }: DashboardProps) {
+export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, onWalletChange, onToggleFavorite }: DashboardProps) {
+  const [selectedImage, setSelectedImage] = useState<GeneratedContent | null>(null);
   const monthlySpend = history.reduce((sum, item) => sum + item.cost, 0);
   const imageCount = history.filter(item => item.type === 'image').length;
   const videoCount = history.filter(item => item.type === 'video').length;
@@ -170,6 +174,7 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
                     <Card
                       key={item.id}
                       className="group p-4 border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+                      onClick={() => setSelectedImage(item)}
                     >
                       <div className="flex items-center gap-4">
                         {/* Thumbnail */}
@@ -220,6 +225,23 @@ export function Dashboard({ onNavigate, history, onDisconnect, walletAddress, on
           </div>
         </main>
       </div>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <ImageModal
+          content={selectedImage}
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          onToggleFavorite={async (id) => {
+            await onToggleFavorite(id);
+            // Actualizar el estado local del modal
+            const updated = history.find(h => h.id === id);
+            if (updated) {
+              setSelectedImage({ ...updated, isFavorite: !updated.isFavorite });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -2,35 +2,90 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Download, RefreshCw, Share2, Heart, Sparkles, ArrowLeft, Copy, Check, Image, Video, Clock, Palette } from 'lucide-react';
+import { Download, RefreshCw, Share2, Heart, Sparkles, ArrowLeft, Copy, Check, Image, Video, Clock, Palette, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { config } from '../config';
 import type { View, GeneratedContent } from '../App';
 import type { WalletState } from '../services/x402';
 
 interface ResultProps {
   content: GeneratedContent;
   onNavigate: (view: View) => void;
-  onRegenerate: () => void;
+  onRegenerate: (prompt: string, type: 'image' | 'video', model: string) => void;
+  onToggleFavorite: (id: string) => Promise<void>;
   onDisconnect: () => void;
   walletAddress?: string | null;
   onWalletChange?: (state: WalletState) => void;
 }
 
 const suggestedPrompts = [
-  { text: 'Anadir mas detalles al fondo', icon: Palette },
-  { text: 'Cambiar iluminacion a atardecer', icon: Sparkles },
-  { text: 'Version en estilo anime', icon: Image },
-  { text: 'Aumentar saturacion de colores', icon: Palette },
+  { text: 'Anadir mas detalles al fondo', icon: Palette, modifier: 'with more detailed background elements' },
+  { text: 'Cambiar iluminacion a atardecer', icon: Sparkles, modifier: 'with sunset lighting and warm golden hour colors' },
+  { text: 'Version en estilo anime', icon: Image, modifier: 'in anime style, japanese animation aesthetic' },
+  { text: 'Aumentar saturacion de colores', icon: Palette, modifier: 'with vibrant saturated colors and high contrast' },
 ];
 
-export function Result({ content, onNavigate, onRegenerate, onDisconnect, walletAddress, onWalletChange }: ResultProps) {
+export function Result({ content, onNavigate, onRegenerate, onToggleFavorite, onDisconnect, walletAddress, onWalletChange }: ResultProps) {
   const [copied, setCopied] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleCopyPrompt = () => {
     navigator.clipboard.writeText(content.prompt);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Funcion para descargar la imagen
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch(content.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ultrapayx402-${content.id}.${content.type === 'video' ? 'mp4' : 'png'}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading:', error);
+      // Fallback: abrir en nueva ventana
+      window.open(content.url, '_blank');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  // Funcion para regenerar (con pago x402)
+  const handleRegenerate = async () => {
+    setIsRegenerating(true);
+    try {
+      await onRegenerate(content.prompt, content.type, content.model);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
+  // Funcion para compartir en Twitter con preview de imagen
+  const handleShare = () => {
+    const shareUrl = `${config.apiUrl}/share/${content.id}`;
+    const tweetText = encodeURIComponent(`Acabo de crear esta imagen con UltraPayx402 usando micropagos x402!\n\n`);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(twitterUrl, '_blank', 'width=550,height=420');
+  };
+
+  // Funcion para guardar como favorito
+  const handleToggleFavorite = async () => {
+    setIsTogglingFavorite(true);
+    try {
+      await onToggleFavorite(content.id);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
   };
 
   return (
@@ -65,9 +120,18 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
                     />
                     {/* Overlay on hover */}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                      <Button size="lg" className="gap-2">
-                        <Download className="size-5" />
-                        Descargar HD
+                      <Button
+                        size="lg"
+                        className="gap-2"
+                        onClick={handleDownload}
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? (
+                          <Loader2 className="size-5 animate-spin" />
+                        ) : (
+                          <Download className="size-5" />
+                        )}
+                        {isDownloading ? 'Descargando...' : 'Descargar HD'}
                       </Button>
                     </div>
                   </div>
@@ -75,25 +139,47 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
                   {/* Actions */}
                   <div className="p-4 border-t border-border/50">
                     <div className="flex flex-wrap gap-3">
-                      <Button className="gap-2 shadow-lg shadow-primary/25">
-                        <Download className="size-4" />
-                        Descargar
+                      <Button
+                        className="gap-2 shadow-lg shadow-primary/25"
+                        onClick={handleDownload}
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Download className="size-4" />
+                        )}
+                        {isDownloading ? 'Descargando...' : 'Descargar'}
                       </Button>
-                      <Button variant="outline" className="gap-2" onClick={onRegenerate}>
-                        <RefreshCw className="size-4" />
-                        Regenerar
+                      <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={handleRegenerate}
+                        disabled={isRegenerating}
+                      >
+                        {isRegenerating ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="size-4" />
+                        )}
+                        {isRegenerating ? 'Regenerando...' : 'Regenerar'}
                       </Button>
-                      <Button variant="outline" className="gap-2">
+                      <Button variant="outline" className="gap-2" onClick={handleShare}>
                         <Share2 className="size-4" />
                         Compartir
                       </Button>
                       <Button
                         variant="outline"
-                        className={`gap-2 ${liked ? 'text-pink-500 border-pink-500/50 bg-pink-500/10' : ''}`}
-                        onClick={() => setLiked(!liked)}
+                        className={`gap-2 ${content.isFavorite ? 'text-pink-500 border-pink-500/50 bg-pink-500/10' : ''}`}
+                        onClick={handleToggleFavorite}
+                        disabled={isTogglingFavorite}
                       >
-                        <Heart className={`size-4 ${liked ? 'fill-current' : ''}`} />
-                        {liked ? 'Guardado' : 'Guardar'}
+                        {isTogglingFavorite ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Heart className={`size-4 ${content.isFavorite ? 'fill-current' : ''}`} />
+                        )}
+                        {content.isFavorite ? 'Guardado' : 'Guardar'}
                       </Button>
                     </div>
                   </div>
@@ -109,12 +195,15 @@ export function Result({ content, onNavigate, onRegenerate, onDisconnect, wallet
                   <div className="grid sm:grid-cols-2 gap-3">
                     {suggestedPrompts.map((suggestion, index) => {
                       const Icon = suggestion.icon;
+                      // Combinar el prompt original con el modificador de la sugerencia
+                      const enhancedPrompt = `${content.prompt}, ${suggestion.modifier}`;
                       return (
                         <Button
                           key={index}
                           variant="outline"
                           className="gap-3 justify-start h-auto py-3 px-4 hover:border-primary/50 hover:bg-primary/5 transition-all"
-                          onClick={onRegenerate}
+                          onClick={() => onRegenerate(enhancedPrompt, content.type, content.model)}
+                          disabled={isRegenerating}
                         >
                           <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <Icon className="size-4 text-primary" />
