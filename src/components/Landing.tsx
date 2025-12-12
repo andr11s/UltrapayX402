@@ -85,8 +85,7 @@ export function Landing({ onConnectWallet, onGoToDashboard, onDisconnect, isConn
               <div>
                 <span className="font-semibold text-xl text-white">UltraPayx402</span>
                 <p className="text-sm text-muted-foreground">Micropagos IA</p>
-              </div>
-              <span className="font-semibold text-lg text-foreground">UltraPayx402</span>
+              </div> 
             </div>
             <div className="flex items-center gap-3">
               {/* Theme toggle */}
